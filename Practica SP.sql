@@ -1,3 +1,5 @@
+--Practica 2 Stored Procedure
+
 CREATE TABLE urbanizaciones (
     id number PRIMARY KEY,
     nombre VARCHAR2(200)
@@ -12,14 +14,14 @@ CREATE TABLE personas (
 );
 
 ALTER TABLE personas ADD CONSTRAINT urbanizacion_persona_fk FOREIGN KEY (urbanizacion_id) REFERENCES urbanizaciones(id);
-ALTER TABLE personas ADD CONSTRAINT estado_persona_chk CHECK(estado = 'I' OR  estado = 'F' OR estado = 'R' OR estado = 'S');
+ALTER TABLE personas ADD CONSTRAINT estado_persona_chk CHECK(estado = 'I' OR  estado = 'F' OR estado = 'S');
 
 /* Urbanizaciones */
 INSERT INTO urbanizaciones (id,nombre) VALUES (1, 'Carrolton');
 INSERT INTO urbanizaciones (id,nombre) VALUES (2, 'Magnolia');
 
 /* Carrolton */
-INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (1,'Frank','Hesse','S',1);
+INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (1,'Frank','Hesse','I',1);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (2,'Jack','Russell','S',1);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (3,'Fernando','Lopez','S',1);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (4,'Felix','Schmidt','S',1);
@@ -28,7 +30,7 @@ INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) V
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (7,'Gregg','Spinetti','S',1);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (8,'Anthony','Mars','S',1);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (9,'Norman','Atomic','S',1);
-INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (10,'Angel','Revilla','S',1);
+INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (10,'Angel','Revilla','I',1);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (11,'John','Anderson','S',1);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (12,'Julian','Brandt','S',1);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (13,'Yonaikel','Alexander','S',1);
@@ -57,7 +59,7 @@ INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) V
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (34,'Luca','Jovic','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (35,'Louis','Poirot','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (36,'Alexis','Berkowitz','S',2);
-INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (37,'Gabriel','Brown','S',2);
+INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (37,'Gabriel','Brown','I',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (38,'Mary','Johnson','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (39,'Ariel','Graham','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (40,'Mark','Spiegel','S',2);
@@ -65,7 +67,7 @@ INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) V
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (42,'Paolo','Rossi','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (43,'Sven','Bender','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (44,'Leon','Muller','S',2);
-INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (45,'Leah','Wulf','S',2);
+INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (45,'Leah','Wulf','I',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (46,'Viktor','Fischer','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (47,'John','Ki','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (48,'Sophia','Krueger','S',2);
@@ -91,3 +93,58 @@ INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) V
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (68,'Andrew','Miller','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (69,'Aaron','Vinachi','S',2);
 INSERT INTO personas (id,primer_nombre,primer_apellido,estado,urbanizacion_id) VALUES (70,'Thomas','Rizek','S',2);
+
+--Procediemeto que debe recibir el nombre de la urbanizaci�n 
+CREATE OR REPLACE Procedure simulacion_urb(urb VARCHAR2) 
+IS
+    v_infectados number(4); --numero de personas infectadas originalemtne
+    v_total number(4);      --numero de personas infectadas actualizado
+    v_random number(4);     --numero aleatorio de contagios
+    v_limit number(4);      --numero de personas en la urbanizacion
+    v_urb_id number(4);     --id de la urbanizacion
+    salida SYS_REFCURSOR;   --salida de script
+    
+BEGIN
+    --Almacenar id de la urbanizacion
+    SELECT id INTO v_urb_id FROM urbanizaciones WHERE nombre = urb;
+    
+    --Almacenar numero de personas infectadas en la urbanizacion
+    SELECT count(*) INTO v_infectados
+        FROM personas
+        WHERE estado = 'I';
+    
+    --Almacenar numero de personas en la urbanizacion
+    SELECT count(*) INTO v_limit
+        FROM personas
+        WHERE (urbanizacion_id = v_urb_id AND estado = 'S');
+    
+    --Generar valor alearotio de infecciones
+    v_random := DBMS_RANDOM.VALUE(1,v_limit);
+    
+    --calculo de infectados totales
+    v_total := v_infectados + v_random;
+    
+    --Actualiza un aletoriamente un grupo de personas sanas a infectadas. Tantas como el numero aleatorio generado
+    UPDATE personas 
+        SET estado = 'I'
+        WHERE id IN (SELECT id FROM (
+            SELECT * FROM personas WHERE (urbanizacion_id = v_urb_id AND estado = 'S') ORDER BY dbms_random.value 
+            )WHERE rownum <= v_random);
+    
+    --Impresiones en pantalla
+    DBMS_OUTPUT.PUT_LINE('Al romper la cuarentena urbanizacion '|| urb ||' se contagiaron '||v_random ||' peronas sanas');
+    DBMS_OUTPUT.PUT_LINE('Ahora el total de infectados aumento de '|| v_infectados ||' hasta '|| v_total ||' contagiados');
+EXCEPTION
+    WHEN no_data_found THEN
+        DBMS_OUTPUT.PUT_LINE('ERROR, Urbanizacion no registrada');
+    
+END;
+
+SET SERVEROUTPUT ON;
+EXECUTE SIMULACION_URB('Magnolia');
+
+SELECT p.primer_nombre as "NOMBRE", p.primer_apellido as "APELLIDO", u.nombre as "URBANIZACION", 
+(CASE WHEN p.estado = 'I' THEN 'INFECTADO' ELSE 'SANO' END) as "ESTADO"
+FROM personas p
+JOIN urbanizaciones u ON u.id = p.urbanizacion_id
+ORDER BY p.estado;
