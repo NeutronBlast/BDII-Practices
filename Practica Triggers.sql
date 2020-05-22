@@ -106,13 +106,14 @@ INSERT INTO F_I (id_farmacia,id_insumo,cantidad) VALUES (2,2,32);
 INSERT INTO F_I (id_farmacia,id_insumo,cantidad) VALUES (2,3,101);
 
 /* Consultar ordenes de compra */
-SELECT o.codigo, p.nombre as proveedor, i.nombre as insumo, f.nombre as farmacia
+SELECT o.codigo, p.nombre as proveedor, i.nombre as insumo, f.nombre as farmacia, fi.cantidad as "CANTIDAD DISPONIBLE ACTUAL"
 FROM ordenes_compra o
 JOIN proveedores p ON p.id = o.id_proveedor
 JOIN insumos i ON i.id = o.id_insumo
-JOIN farmacias f ON f.id = o.id_farmacia;
+JOIN farmacias f ON f.id = o.id_farmacia
+JOIN F_I fi ON fi.id_farmacia = o.id_farmacia AND fi.id_insumo = o.id_insumo;
 
-/* Consultar inventarios */
+/* Consultar inventarios actuales */
 SELECT f.nombre as farmacia, i.nombre as insumo, fi.cantidad as disponible
 FROM F_I fi
 JOIN farmacias f ON f.id = fi.id_farmacia
